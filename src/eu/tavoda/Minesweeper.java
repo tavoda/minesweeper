@@ -11,11 +11,10 @@ public class Minesweeper extends JFrame {
     private static final int DEFAULT_CELL_SIZE = 30;
 
     private JTextField statusbar;
-//    private int rows = 20;
-//    private int cols = 40;
-//    private int mines = 80;
-//    private int cellSize = 30;
     MineField mineField;
+    SevenSegment SA = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, Color.GREEN);
+    SevenSegment SB = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, Color.GREEN);
+    SevenSegment SC = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, Color.GREEN);
 
     public Minesweeper() {
         initUI();
@@ -24,19 +23,19 @@ public class Minesweeper extends JFrame {
     private void initUI() {
         JPanel toolbar = new JPanel();
         toolbar.setLayout(new BoxLayout(toolbar, BoxLayout.LINE_AXIS));
+        toolbar.add(SA);
+        toolbar.add(SB);
+        toolbar.add(SC);
         toolbar.add(getNoviceButton());
         toolbar.add(getIntermediateButton());
         toolbar.add(getExpertButton());
         toolbar.add(new JButton("Custom"));
-        toolbar.add(new SevenSegment(50, 90));
-        toolbar.add(new SevenSegment(50, 90));
-        toolbar.add(new SevenSegment(50, 90));
         add(toolbar, BorderLayout.NORTH);
 
         statusbar = new JTextField("");
         add(statusbar, BorderLayout.SOUTH);
 
-        mineField = new MineField(statusbar, 20, 40, 80, DEFAULT_CELL_SIZE);
+        mineField = new MineField(statusbar, this::setSegments, 20, 40, 80, DEFAULT_CELL_SIZE);
         add(mineField);
 
         setTitle("Minesweeper");
@@ -46,6 +45,15 @@ public class Minesweeper extends JFrame {
         setResizable(true);
         pack();
         setMinimumSize(getSize());
+    }
+
+    private void setSegments(Integer mines) {
+        int hundrets = mines / 100;
+        int tenths = mines % 100 / 10;
+        int items = mines % 10;
+        SA.setNumber(hundrets);
+        SB.setNumber(tenths);
+        SC.setNumber(items);
     }
 
     private Component getNoviceButton() {
@@ -62,14 +70,11 @@ public class Minesweeper extends JFrame {
 
     private Component getExpertButton() {
         JButton novice = new JButton("Expert");
-        novice.addActionListener(e -> newGame(20, 40, 80, DEFAULT_CELL_SIZE));
+        novice.addActionListener(e -> newGame(20, 40, 100, DEFAULT_CELL_SIZE));
         return novice;
     }
 
     private void newGame(int rows, int columns, int mines, int cellSize) {
-//        setSize(new Dimension(100, 100));
-//        setPreferredSize(new Dimension(100, 100));
-//        setMinimumSize(new Dimension(100, 100));
         Dimension min = new Dimension(columns * cellSize, rows * cellSize);
         mineField.setParameters(rows, columns, mines, cellSize);
         pack();

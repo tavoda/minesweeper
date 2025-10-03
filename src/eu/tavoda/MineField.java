@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.function.Consumer;
 import javax.swing.*;
 
 public class MineField extends JPanel {
@@ -33,6 +34,7 @@ public class MineField extends JPanel {
     private int[] field;
     private boolean inGame;
     private int minesLeft;
+    Consumer<Integer> minesCallback;
     private Image[] img;
 
     int xOffset;
@@ -41,9 +43,10 @@ public class MineField extends JPanel {
     private int allCells;
     private final JTextField statusbar;
 
-    public MineField(JTextField statusbar, int rows, int columns, int mines, int cellSize) {
+    public MineField(JTextField statusbar, Consumer<Integer> minesCallback, int rows, int columns, int mines, int cellSize) {
         initBoard();
         this.statusbar = statusbar;
+        this.minesCallback = minesCallback;
         setParameters(rows, columns, mines, cellSize);
     }
 
@@ -81,7 +84,7 @@ public class MineField extends JPanel {
             field[i] = COVER_FOR_CELL;
         }
 
-        statusbar.setText(Integer.toString(minesLeft));
+        minesCallback.accept(minesLeft);
 
         int j = 0;
         while (j < N_MINES) {
@@ -367,16 +370,14 @@ public class MineField extends JPanel {
                             if (minesLeft > 0) {
                                 field[cell] += MARK_FOR_CELL;
                                 minesLeft--;
-                                String msg = Integer.toString(minesLeft);
-                                statusbar.setText(msg);
+                                minesCallback.accept(minesLeft);
                             } else {
                                 statusbar.setText("No marks left");
                             }
                         } else {
                             field[cell] -= MARK_FOR_CELL;
                             minesLeft++;
-                            String msg = Integer.toString(minesLeft);
-                            statusbar.setText(msg);
+                            minesCallback.accept(minesLeft);
                         }
                     }
                 } else {
@@ -385,7 +386,6 @@ public class MineField extends JPanel {
                     }
 
                     if (field[cell] < MINE_CELL && field[cell] > 0) {
-                        statusbar.setText("MINE: " + cell + " STATUS: " + field[cell]);
                         int[] checkCells = getPatchCell(cell, false);
                         // Count mines around
                         int mineCount = 0;
