@@ -32,8 +32,8 @@ public class SevenSegment extends JPanel {
 	private final static int[][] SEGMENT_CONFIG = {
 			zero, one, two, three, four, five, six, seven, eight, nine
 	};
-	private static Color off = Color.green.darker().darker().darker().darker();
-	private static Color on = Color.green.brighter().brighter().brighter().brighter().brighter();
+	private Color off;
+	private Color on;
 	private int width;
 	private int height;
 	private int border;
@@ -42,20 +42,20 @@ public class SevenSegment extends JPanel {
 	private final Polygon[] segments = new Polygon[SEGMENT_COUNT];
 	private int[] number;
 
-	public SevenSegment(int width, int height, int border, int thick, int space, Color background, Color tint) {
+	public SevenSegment(int width, int height, int border, int thick, int space, Color background, Color on, Color off) {
 		this.width = width;
 		this.height = height;
 		this.border = border;
 		this.thick = thick;
 		this.space = space;
+		this.on = on;
+		this.off = off;
 		Dimension size = new Dimension(width, height);
 		setPreferredSize(size);
 		setMinimumSize(size);
 		setMaximumSize(size);
 		setOpaque(true);
 		setBackground(background);
-		off = tint.darker().darker().darker().darker();
-		on = tint.brighter().brighter().brighter().brighter().brighter();
 		createSegments();
 		number = zero;
 	}
@@ -75,6 +75,30 @@ public class SevenSegment extends JPanel {
 		for (int i = 0; i < SEGMENT_COUNT; i++) {
 			setSegmentState(g, segments[i], number[i]);
 		}
+	}
+
+	private void setSegmentState(Graphics graphics, Polygon segment, int state) {
+		if (state == OFF) {
+			graphics.setColor(off);
+		} else {
+			graphics.setColor(on);
+		}
+		graphics.fillPolygon(segment);
+		graphics.drawPolygon(segment);
+	}
+
+	private void createSegments() {
+		int thickH = thick / 2;
+		int p = border + thickH;
+		int sw = width - 2 * p;
+		int sh = height / 2 - p;
+		segments[A] = createHorizontalPolygon(p, p, sw, thickH, space);
+		segments[B] = createVerticalPolygon(width - p, p, sh, thickH, space);
+		segments[C] = createVerticalPolygon(width - p, height / 2, sh, thickH, space);
+		segments[D] = createHorizontalPolygon(p, height - p, sw, thickH, space);
+		segments[E] = createVerticalPolygon(p, height / 2, sh, thickH, space);
+		segments[F] = createVerticalPolygon(p, p, sh, thickH, space);
+		segments[G] = createHorizontalPolygon(p, height / 2, sw, thickH, space);
 	}
 
 	private Polygon createHorizontalPolygon(int startX, int startY, int length, int thickH, int space) {
@@ -103,30 +127,5 @@ public class SevenSegment extends JPanel {
 		segment.addPoint(startX - thickH, ys + thickH);
 
 		return segment;
-	}
-
-	private void createSegments() {
-		int thickH = thick / 2;
-		int p = border + thickH;
-		int sw = width - 2 * p;
-		int sh = height / 2 - p;
-		segments[A] = createHorizontalPolygon(p, p, sw, thickH, space);
-		segments[B] = createVerticalPolygon(width - p, p, sh, thickH, space);
-		segments[C] = createVerticalPolygon(width - p, height / 2, sh, thickH, space);
-		segments[D] = createHorizontalPolygon(p, height - p, sw, thickH, space);
-		segments[E] = createVerticalPolygon(p, height / 2, sh, thickH, space);
-		segments[F] = createVerticalPolygon(p, p, sh, thickH, space);
-		segments[G] = createHorizontalPolygon(p, height / 2, sw, thickH, space);
-	}
-
-	private void setSegmentState(Graphics graphics, Polygon segment, int state) {
-		if (state == OFF) {
-			graphics.setColor(off);
-		} else {
-			graphics.setColor(on);
-		}
-
-		graphics.fillPolygon(segment);
-		graphics.drawPolygon(segment);
 	}
 }

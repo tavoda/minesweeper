@@ -12,9 +12,12 @@ public class Minesweeper extends JFrame {
 
     private JTextField statusbar;
     MineField mineField;
-    SevenSegment SA = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, Color.GREEN);
-    SevenSegment SB = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, Color.GREEN);
-    SevenSegment SC = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, Color.GREEN);
+    Color SEGMENT_ON = Color.GREEN.brighter().brighter().brighter().brighter().brighter();
+//    Color SEGMENT_OFF = Color.Green.darker().darker().darker().darker();
+	Color SEGMENT_OFF = Color.BLACK;
+    SevenSegment SA = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, SEGMENT_ON, SEGMENT_OFF);
+    SevenSegment SB = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, SEGMENT_ON, SEGMENT_OFF);
+    SevenSegment SC = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, SEGMENT_ON, SEGMENT_OFF);
 
     public Minesweeper() {
         initUI();
@@ -23,13 +26,18 @@ public class Minesweeper extends JFrame {
     private void initUI() {
         JPanel toolbar = new JPanel();
         toolbar.setLayout(new BoxLayout(toolbar, BoxLayout.LINE_AXIS));
+        toolbar.add(Box.createRigidArea(new Dimension(10, 10)));
+        toolbar.add(getNoviceButton());
+        toolbar.add(Box.createRigidArea(new Dimension(10, 10)));
+        toolbar.add(getIntermediateButton());
+        toolbar.add(Box.createRigidArea(new Dimension(10, 10)));
+        toolbar.add(getExpertButton());
+        toolbar.add(Box.createRigidArea(new Dimension(10, 10)));
+        toolbar.add(new JButton("Custom"));
+        toolbar.add(Box.createHorizontalGlue());
         toolbar.add(SA);
         toolbar.add(SB);
         toolbar.add(SC);
-        toolbar.add(getNoviceButton());
-        toolbar.add(getIntermediateButton());
-        toolbar.add(getExpertButton());
-        toolbar.add(new JButton("Custom"));
         add(toolbar, BorderLayout.NORTH);
 
         statusbar = new JTextField("");
