@@ -1,5 +1,8 @@
 package eu.tavoda;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -64,8 +67,17 @@ public class MineField extends JPanel {
     private void initBoard() {
         img = new Image[NUM_IMAGES];
         for (int i = 0; i < NUM_IMAGES; i++) {
-            var path = "resources/" + i + ".png";
-            img[i] = (new ImageIcon(path)).getImage();
+            var path = i + ".png";
+            try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(path)) {
+				if (is != null) {
+                    byte[] imageBytes = is.readAllBytes();
+                    img[i] = (new ImageIcon(imageBytes)).getImage();
+                } else {
+                    throw new RuntimeException("Can't read image: " + path);
+                }
+            } catch (IOException e) {
+				throw new RuntimeException(e);
+			}
         }
 
         addMouseListener(new MinesAdapter());
