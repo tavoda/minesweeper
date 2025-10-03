@@ -6,9 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Random;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class MineField extends JPanel {
 
@@ -41,15 +39,23 @@ public class MineField extends JPanel {
     int yOffset;
 
     private int allCells;
-    private final JLabel statusbar;
+    private final JTextField statusbar;
 
-    public MineField(JLabel statusbar, int rows, int columns, int mines, int cellSize) {
+    public MineField(JTextField statusbar, int rows, int columns, int mines, int cellSize) {
+        initBoard();
         this.statusbar = statusbar;
+        setParameters(rows, columns, mines, cellSize);
+    }
+
+    public void setParameters(int rows, int columns, int mines, int cellSize) {
         N_ROWS = rows;
         N_COLS = columns;
         N_MINES = mines;
         CELL_SIZE = cellSize;
-        initBoard();
+        setPreferredSize(new Dimension(columns * cellSize, rows * cellSize));
+        setSize(new Dimension(columns * cellSize, rows * cellSize));
+        setMinimumSize(new Dimension(columns * cellSize, rows * cellSize));
+        newGame();
     }
 
     private void initBoard() {
@@ -60,14 +66,10 @@ public class MineField extends JPanel {
         }
 
         addMouseListener(new MinesAdapter());
-        newGame();
-
     }
 
-    private void newGame() {
-
+    public void newGame() {
         int cell;
-
         var random = new Random();
         inGame = true;
         minesLeft = N_MINES;
@@ -76,7 +78,6 @@ public class MineField extends JPanel {
         field = new int[allCells];
 
         for (int i = 0; i < allCells; i++) {
-
             field[i] = COVER_FOR_CELL;
         }
 
@@ -85,9 +86,7 @@ public class MineField extends JPanel {
         int j = 0;
         while (j < N_MINES) {
             int position = (int) (allCells * random.nextDouble());
-            if ((position < allCells)
-                    && (field[position] != COVERED_MINE_CELL)) {
-
+            if (position < allCells && field[position] != COVERED_MINE_CELL) {
                 int current_col = position % N_COLS;
                 field[position] = COVERED_MINE_CELL;
                 j++;
@@ -273,8 +272,7 @@ public class MineField extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         Rectangle size = g.getClipBounds();
-        double minSize = Math.min(size.getWidth(), size.getHeight());
-        CELL_SIZE = (int) (minSize / Math.max(N_ROWS, N_COLS));
+        CELL_SIZE = (int) Math.min(size.getWidth() / N_COLS, size.getHeight() / N_ROWS);
         xOffset = (size.width  - CELL_SIZE * N_COLS) / 2;
         yOffset = (size.height - CELL_SIZE * N_ROWS) / 2;
 
