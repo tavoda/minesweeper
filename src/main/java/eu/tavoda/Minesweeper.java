@@ -14,7 +14,7 @@ public class Minesweeper extends JFrame {
     MineField mineField;
     Color SEGMENT_ON = Color.GREEN.brighter().brighter().brighter().brighter().brighter();
 //    Color SEGMENT_OFF = Color.Green.darker().darker().darker().darker();
-	Color SEGMENT_OFF = Color.BLACK;
+	Color SEGMENT_OFF = Color.DARK_GRAY;
     SevenSegment SA = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, SEGMENT_ON, SEGMENT_OFF);
     SevenSegment SB = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, SEGMENT_ON, SEGMENT_OFF);
     SevenSegment SC = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, SEGMENT_ON, SEGMENT_OFF);
@@ -33,7 +33,12 @@ public class Minesweeper extends JFrame {
         toolbar.add(Box.createRigidArea(new Dimension(10, 10)));
         toolbar.add(getExpertButton());
         toolbar.add(Box.createRigidArea(new Dimension(10, 10)));
-        toolbar.add(new JButton("Custom"));
+        JButton createCustomGame = new JButton("Custom");
+        createCustomGame.addActionListener(e -> {
+            CustomGameDialog customGameDialog = new CustomGameDialog(this);
+			customGameDialog.setVisible(true);
+		});
+        toolbar.add(createCustomGame);
         toolbar.add(Box.createHorizontalGlue());
         toolbar.add(SA);
         toolbar.add(SB);
