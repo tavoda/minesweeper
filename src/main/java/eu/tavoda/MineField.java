@@ -44,11 +44,11 @@ public class MineField extends JPanel {
     int yOffset;
 
     private int allCells;
-    private final JTextField statusbar;
+    private final Minesweeper mainWindow;
 
-    public MineField(JTextField statusbar, Consumer<Integer> minesCallback) {
+    public MineField(Minesweeper mainWindow, Consumer<Integer> minesCallback) {
         initBoard();
-        this.statusbar = statusbar;
+        this.mainWindow = mainWindow;
         this.minesCallback = minesCallback;
     }
 
@@ -61,6 +61,7 @@ public class MineField extends JPanel {
         setPreferredSize(new Dimension(columns * cellSize, rows * cellSize));
         setSize(new Dimension(columns * cellSize, rows * cellSize));
         setMinimumSize(new Dimension(columns * cellSize, rows * cellSize));
+        mainWindow.setStatus("", false);
         newGame();
     }
 
@@ -323,9 +324,9 @@ public class MineField extends JPanel {
 
         if (uncover == 0 && inGame) {
             inGame = false;
-            statusbar.setText("Game won");
+            mainWindow.setStatus("Game won", true);
         } else if (!inGame) {
-            statusbar.setText("Game lost");
+            mainWindow.setStatus("Game lost", true);
         }
     }
 
@@ -382,7 +383,7 @@ public class MineField extends JPanel {
                                 minesLeft--;
                                 minesCallback.accept(minesLeft);
                             } else {
-                                statusbar.setText("No marks left");
+                                mainWindow.setStatus("No marks left", false);
                             }
                         } else {
                             field[cell] -= MARK_FOR_CELL;

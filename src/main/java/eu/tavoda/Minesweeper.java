@@ -1,5 +1,7 @@
 package eu.tavoda;
 
+import eu.tavoda.swing.SegmentDisplay;
+
 import java.awt.*;
 import java.util.Random;
 import javax.swing.*;
@@ -13,13 +15,8 @@ public class Minesweeper extends JFrame {
 
     private JTextField statusbar;
     private Random rand = new Random();
-    MineField mineField;
-    Color SEGMENT_ON = Color.GREEN.brighter().brighter().brighter().brighter().brighter();
-//    Color SEGMENT_OFF = Color.Green.darker().darker().darker().darker();
-	Color SEGMENT_OFF = Color.DARK_GRAY;
-    SevenSegment SA = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, SEGMENT_ON, SEGMENT_OFF);
-    SevenSegment SB = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, SEGMENT_ON, SEGMENT_OFF);
-    SevenSegment SC = new SevenSegment(30, 50, 3, 5, 2, Color.BLACK, SEGMENT_ON, SEGMENT_OFF);
+    private MineField mineField;
+    private SegmentDisplay mineDisplay;
 
     public Minesweeper() {
         initUI();
@@ -42,15 +39,14 @@ public class Minesweeper extends JFrame {
 		});
         toolbar.add(createCustomGame);
         toolbar.add(Box.createHorizontalGlue());
-        toolbar.add(SA);
-        toolbar.add(SB);
-        toolbar.add(SC);
+        mineDisplay = new SegmentDisplay(3, 30, 50, 3, 5, 2);
+        toolbar.add(mineDisplay);
         add(toolbar, BorderLayout.NORTH);
 
         statusbar = new JTextField("");
         add(statusbar, BorderLayout.SOUTH);
 
-        mineField = new MineField(statusbar, this::setSegments);
+        mineField = new MineField(this, this::setSegments);
         mineField.newGame(20, 40, 80, rand.nextLong(), DEFAULT_CELL_SIZE);
         add(mineField);
 
@@ -64,12 +60,7 @@ public class Minesweeper extends JFrame {
     }
 
     private void setSegments(Integer mines) {
-        int hundrets = mines / 100;
-        int tenths = mines % 100 / 10;
-        int items = mines % 10;
-        SA.setNumber(hundrets);
-        SB.setNumber(tenths);
-        SC.setNumber(items);
+        mineDisplay.setValue(mines);
     }
 
     private Component getNoviceButton() {
@@ -86,7 +77,7 @@ public class Minesweeper extends JFrame {
 
     private Component getExpertButton() {
         JButton novice = new JButton("Expert");
-        novice.addActionListener(e -> newGame(20, 40, 100, rand.nextLong()));
+        novice.addActionListener(e -> newGame(20, 40, 140, rand.nextLong()));
         return novice;
     }
 
@@ -101,8 +92,24 @@ public class Minesweeper extends JFrame {
         repaint();
     }
 
+    public void setStatus(String statusText, boolean showDialog) {
+        statusbar.setText(statusText);
+        if (showDialog) {
+//            JDialog dialog = new JDialog(this, "Status", true);
+//            dialog.setLayout(new BoxLayout(dialog.getContentPane(), BoxLayout.Y_AXIS));
+//            dialog.add(new JLabel(statusText));
+//            JButton okBtn = new JButton("OK");
+//            okBtn.addActionListener(e -> dialog.setVisible(false));
+//            dialog.add(okBtn);
+//            dialog.setLocationRelativeTo(this);
+//            dialog.pack();
+//            SwingUtilities.invokeLater(() -> dialog.setVisible(true));
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, statusText, "Status", JOptionPane.INFORMATION_MESSAGE));
+        }
+    }
+
     public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             Minesweeper ex = new Minesweeper();
             ex.setVisible(true);
         });

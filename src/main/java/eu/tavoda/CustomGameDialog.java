@@ -36,11 +36,19 @@ public class CustomGameDialog extends JFrame {
 
 		setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
 		setTitle("Custom game");
-		JPanel panel = new JPanel(new GridBagLayout());
+		GridBagLayout gbl = new GridBagLayout();
+		JPanel panel = new JPanel(gbl);
 		createInput(panel, H_SIZE, "Horizontal size", 40L, true);
 		createInput(panel, V_SIZE, "Vertical size", 20L, true);
 		createInput(panel, MINES, "Mines", 120L, true);
 		createInput(panel, RANDOM, "Random", Math.abs((new Random()).nextLong()), true);
+		JButton newRandomBtn = new JButton("New random");
+		newRandomBtn.addActionListener(e -> {
+			fields.get(RANDOM).setText(Long.toString(Math.abs((new Random()).nextLong())));
+			encodeId();
+		});
+		gbl.setConstraints(newRandomBtn, fieldConstraints);
+		panel.add(newRandomBtn);
 		createInput(panel, ID, "ID", 0L, false);
 		encodeId();
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -86,7 +94,17 @@ public class CustomGameDialog extends JFrame {
 	}
 
 	private boolean decodeId(String idBase) {
-		String id = new String(Base64.getDecoder().decode(idBase), StandardCharsets.ISO_8859_1);
+		String base = idBase.trim();
+		String id;
+		try {
+			id = new String(Base64.getDecoder().decode(base), StandardCharsets.ISO_8859_1);
+		} catch(IllegalArgumentException e) {
+			try {
+				id = new String(Base64.getDecoder().decode(base + "="), StandardCharsets.ISO_8859_1);
+			} catch(IllegalArgumentException e2) {
+				id = new String(Base64.getDecoder().decode(base + "=="), StandardCharsets.ISO_8859_1);
+			}
+		}
 		String[] idValues = id.split(",");
 		boolean result = false;
 
@@ -129,7 +147,9 @@ public class CustomGameDialog extends JFrame {
 
 			DocumentValueFilter.installFilter(textField, (oldVal, newVal) -> {
 				try {
-					Long.parseLong(newVal);
+					if (!newVal.isBlank()) {
+						Long.parseLong(newVal);
+					}
 					return true;
 				} catch (NumberFormatException e) {
 					// Ignore

@@ -1,4 +1,4 @@
-package eu.tavoda;
+package eu.tavoda.swing;
 
 import javax.swing.*;
 import java.awt.*;
