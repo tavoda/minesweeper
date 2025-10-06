@@ -12,17 +12,31 @@ import java.util.Map;
 import java.util.Random;
 
 public class CustomGameDialog extends JFrame {
+	private static final int INSET_VAL = 2;
+	private static final Insets insets = new Insets(INSET_VAL, INSET_VAL, INSET_VAL, INSET_VAL);
+
 	public static final String H_SIZE = "hSize";
 	public static final String V_SIZE = "vSize";
 	public static final String MINES = "mines";
 	public static final String RANDOM = "random";
 	public static final String ID = "ID";
+	GridBagConstraints labelConstraints = new GridBagConstraints();
+	GridBagConstraints fieldConstraints = new GridBagConstraints();
 	Map<String, JTextComponent> fields = new HashMap<>();
+	Minesweeper minesweeper;
 
-	public CustomGameDialog(JFrame parent) {
+	public CustomGameDialog(Minesweeper parent) {
+		fieldConstraints.fill = GridBagConstraints.BOTH;
+		fieldConstraints.weightx = 2;
+		fieldConstraints.gridwidth = GridBagConstraints.REMAINDER;
+		fieldConstraints.insets = insets;
+		labelConstraints.fill = GridBagConstraints.BOTH;
+		labelConstraints.insets = insets;
+		minesweeper = parent;
+
 		setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
 		setTitle("Custom game");
-		JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
+		JPanel panel = new JPanel(new GridBagLayout());
 		createInput(panel, H_SIZE, "Horizontal size", 40L, true);
 		createInput(panel, V_SIZE, "Vertical size", 20L, true);
 		createInput(panel, MINES, "Mines", 120L, true);
@@ -37,22 +51,28 @@ public class CustomGameDialog extends JFrame {
 		add(panel, BorderLayout.CENTER);
 		add(Box.createVerticalGlue(), BorderLayout.NORTH);
 
+		JPanel buttons = getButtonsPanel();
+		add(buttons);
+		pack();
+		setLocationByPlatform(true);
+	}
+
+	private JPanel getButtonsPanel() {
 		JPanel buttons = new JPanel();
 		JButton start = new JButton("New game");
 		start.addActionListener(e -> {
-			System.out.println(H_SIZE + ": " + fields.get(H_SIZE).getText());
-			System.out.println(V_SIZE + ": " + fields.get(V_SIZE).getText());
-			System.out.println(MINES + ": " + fields.get(MINES).getText());
-			System.out.println(RANDOM + ": " + fields.get(RANDOM).getText());
+			Long rows = getFieldValue(V_SIZE);
+			Long cols = getFieldValue(H_SIZE);
+			Long mines = getFieldValue(MINES);
+			Long random = getFieldValue(RANDOM);
+			minesweeper.newGame(rows.intValue(), cols.intValue(), mines.intValue(), random);
 			setVisible(false);
 		});
 		buttons.add(start);
 		JButton cancel = new JButton("Cancel");
 		cancel.addActionListener(e -> this.setVisible(false));
 		buttons.add(cancel);
-		add(buttons);
-		pack();
-		setLocationByPlatform(true);
+		return buttons;
 	}
 
 	private void encodeId() {
@@ -90,11 +110,13 @@ public class CustomGameDialog extends JFrame {
 	}
 
 	private void createInput(JPanel p, String name, String label, Long value, boolean numberOnly) {
-		JLabel l = new JLabel(label);
+		GridBagLayout gbl = (GridBagLayout) p.getLayout();
+		JLabel l = new JLabel(label + ":");
 		l.setHorizontalAlignment(JLabel.RIGHT);
+		l.setHorizontalTextPosition(JLabel.RIGHT);
+		gbl.setConstraints(l, labelConstraints);
 		p.add(l);
 		JTextField textField = new JTextField();
-		textField.setMaximumSize(new Dimension(400, 100));
 		textField.setText(Long.toString(value));
 
 		if (numberOnly) {
@@ -121,6 +143,7 @@ public class CustomGameDialog extends JFrame {
 			});
 		}
 		fields.put(name, textField);
+		gbl.setConstraints(textField, fieldConstraints);
 		p.add(textField);
 	}
 }

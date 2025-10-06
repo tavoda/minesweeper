@@ -1,6 +1,5 @@
 package eu.tavoda;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -16,7 +15,7 @@ public class MineField extends JPanel {
 
     private final int NUM_IMAGES = 13;
     private final int MIN_CELL_SIZE = 15;
-    private int CELL_SIZE = 30;
+    private int cellSize = 30;
 
     private final int COVER_FOR_CELL = 10;
     private final int MARK_FOR_CELL = 10;
@@ -30,9 +29,10 @@ public class MineField extends JPanel {
     private final int DRAW_MARK = 11;
     private final int DRAW_WRONG_MARK = 12;
 
-    private int N_MINES = 40;
-    private int N_ROWS = 16;
-    private int N_COLS = 16;
+    private int numMines;
+    private int numRows;
+    private int numCols;
+    private long seed;
 
     private int[] field;
     private boolean inGame;
@@ -46,18 +46,18 @@ public class MineField extends JPanel {
     private int allCells;
     private final JTextField statusbar;
 
-    public MineField(JTextField statusbar, Consumer<Integer> minesCallback, int rows, int columns, int mines, int cellSize) {
+    public MineField(JTextField statusbar, Consumer<Integer> minesCallback) {
         initBoard();
         this.statusbar = statusbar;
         this.minesCallback = minesCallback;
-        setParameters(rows, columns, mines, cellSize);
     }
 
-    public void setParameters(int rows, int columns, int mines, int cellSize) {
-        N_ROWS = rows;
-        N_COLS = columns;
-        N_MINES = mines;
-        CELL_SIZE = cellSize;
+    public void newGame(int rows, int columns, int mines, long randomStart, int cellSize) {
+        numRows = rows;
+        numCols = columns;
+        numMines = mines;
+        this.cellSize = cellSize;
+        seed = randomStart;
         setPreferredSize(new Dimension(columns * cellSize, rows * cellSize));
         setSize(new Dimension(columns * cellSize, rows * cellSize));
         setMinimumSize(new Dimension(columns * cellSize, rows * cellSize));
@@ -83,13 +83,13 @@ public class MineField extends JPanel {
         addMouseListener(new MinesAdapter());
     }
 
-    public void newGame() {
+    private void newGame() {
         int cell;
-        var random = new Random();
+        var random = new Random(seed);
         inGame = true;
-        minesLeft = N_MINES;
+        minesLeft = numMines;
 
-        allCells = N_ROWS * N_COLS;
+        allCells = numRows * numCols;
         field = new int[allCells];
 
         for (int i = 0; i < allCells; i++) {
@@ -99,15 +99,15 @@ public class MineField extends JPanel {
         minesCallback.accept(minesLeft);
 
         int j = 0;
-        while (j < N_MINES) {
+        while (j < numMines) {
             int position = (int) (allCells * random.nextDouble());
             if (position < allCells && field[position] != COVERED_MINE_CELL) {
-                int current_col = position % N_COLS;
+                int current_col = position % numCols;
                 field[position] = COVERED_MINE_CELL;
                 j++;
 
                 if (current_col > 0) {
-                    cell = position - 1 - N_COLS;
+                    cell = position - 1 - numCols;
                     if (cell >= 0) {
                         if (field[cell] != COVERED_MINE_CELL) {
                             field[cell] += 1;
@@ -120,7 +120,7 @@ public class MineField extends JPanel {
                         }
                     }
 
-                    cell = position + N_COLS - 1;
+                    cell = position + numCols - 1;
                     if (cell < allCells) {
                         if (field[cell] != COVERED_MINE_CELL) {
                             field[cell] += 1;
@@ -128,28 +128,28 @@ public class MineField extends JPanel {
                     }
                 }
 
-                cell = position - N_COLS;
+                cell = position - numCols;
                 if (cell >= 0) {
                     if (field[cell] != COVERED_MINE_CELL) {
                         field[cell] += 1;
                     }
                 }
 
-                cell = position + N_COLS;
+                cell = position + numCols;
                 if (cell < allCells) {
                     if (field[cell] != COVERED_MINE_CELL) {
                         field[cell] += 1;
                     }
                 }
 
-                if (current_col < (N_COLS - 1)) {
-                    cell = position - N_COLS + 1;
+                if (current_col < (numCols - 1)) {
+                    cell = position - numCols + 1;
                     if (cell >= 0) {
                         if (field[cell] != COVERED_MINE_CELL) {
                             field[cell] += 1;
                         }
                     }
-                    cell = position + N_COLS + 1;
+                    cell = position + numCols + 1;
                     if (cell < allCells) {
                         if (field[cell] != COVERED_MINE_CELL) {
                             field[cell] += 1;
@@ -185,12 +185,12 @@ public class MineField extends JPanel {
     }
 
     private int findEmptyCells(int j) {
-        int current_col = j % N_COLS;
+        int current_col = j % numCols;
         int cell;
         int emptyCells = 0;
 
         if (current_col > 0) {
-            cell = j - N_COLS - 1;
+            cell = j - numCols - 1;
             if (cell >= 0) {
                 if (field[cell] > MINE_CELL) {
                     field[cell] -= COVER_FOR_CELL;
@@ -212,7 +212,7 @@ public class MineField extends JPanel {
                 }
             }
 
-            cell = j + N_COLS - 1;
+            cell = j + numCols - 1;
             if (cell < allCells) {
                 if (field[cell] > MINE_CELL) {
                     field[cell] -= COVER_FOR_CELL;
@@ -224,7 +224,7 @@ public class MineField extends JPanel {
             }
         }
 
-        cell = j - N_COLS;
+        cell = j - numCols;
         if (cell >= 0) {
             if (field[cell] > MINE_CELL) {
                 field[cell] -= COVER_FOR_CELL;
@@ -235,7 +235,7 @@ public class MineField extends JPanel {
             }
         }
 
-        cell = j + N_COLS;
+        cell = j + numCols;
         if (cell < allCells) {
             if (field[cell] > MINE_CELL) {
                 field[cell] -= COVER_FOR_CELL;
@@ -246,8 +246,8 @@ public class MineField extends JPanel {
             }
         }
 
-        if (current_col < (N_COLS - 1)) {
-            cell = j - N_COLS + 1;
+        if (current_col < (numCols - 1)) {
+            cell = j - numCols + 1;
             if (cell >= 0) {
                 if (field[cell] > MINE_CELL) {
                     field[cell] -= COVER_FOR_CELL;
@@ -258,7 +258,7 @@ public class MineField extends JPanel {
                 }
             }
 
-            cell = j + N_COLS + 1;
+            cell = j + numCols + 1;
             if (cell < allCells) {
                 if (field[cell] > MINE_CELL) {
                     field[cell] -= COVER_FOR_CELL;
@@ -287,14 +287,14 @@ public class MineField extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         Rectangle size = g.getClipBounds();
-        CELL_SIZE = (int) Math.min(size.getWidth() / N_COLS, size.getHeight() / N_ROWS);
-        xOffset = (size.width  - CELL_SIZE * N_COLS) / 2;
-        yOffset = (size.height - CELL_SIZE * N_ROWS) / 2;
+        cellSize = (int) Math.min(size.getWidth() / numCols, size.getHeight() / numRows);
+        xOffset = (size.width  - cellSize * numCols) / 2;
+        yOffset = (size.height - cellSize * numRows) / 2;
 
         int uncover = 0;
-        for (int i = 0; i < N_ROWS; i++) {
-            for (int j = 0; j < N_COLS; j++) {
-                int cell = field[(i * N_COLS) + j];
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numCols; j++) {
+                int cell = field[(i * numCols) + j];
                 if (inGame && cell == MINE_CELL) {
                     inGame = false;
                 }
@@ -317,7 +317,7 @@ public class MineField extends JPanel {
                         uncover++;
                     }
                 }
-                g.drawImage(img[cell], (j * CELL_SIZE) + xOffset, (i * CELL_SIZE) + yOffset, CELL_SIZE, CELL_SIZE, this);
+                g.drawImage(img[cell], (j * cellSize) + xOffset, (i * cellSize) + yOffset, cellSize, cellSize, this);
             }
         }
 
@@ -331,15 +331,15 @@ public class MineField extends JPanel {
 
     private int[] getPatchCell(int cellOffset, boolean includeOrigin) {
         List<Integer> result = new ArrayList<>();
-        add3(result, cellOffset - N_COLS, true);
+        add3(result, cellOffset - numCols, true);
         add3(result, cellOffset         , includeOrigin);
-        add3(result, cellOffset + N_COLS, true);
+        add3(result, cellOffset + numCols, true);
 
         return result.stream().mapToInt(i -> i).toArray();
     }
 
     private void add3(List<Integer> patch, int origin, boolean includeOrigin) {
-        int row = origin / N_COLS;
+        int row = origin / numCols;
         for (int i = -1; i <= 1; i++) {
             if (i != 0 || includeOrigin) {
                 checkPoint(patch, origin + i, row);
@@ -348,7 +348,7 @@ public class MineField extends JPanel {
     }
 
     private void checkPoint(List<Integer> patch, int cell, int row) {
-        if (cell >= 0 && cell < field.length && (cell / N_COLS) == row) {
+        if (cell >= 0 && cell < field.length && (cell / numCols) == row) {
             patch.add(cell);
         }
     }
@@ -363,18 +363,16 @@ public class MineField extends JPanel {
                 return;
             }
             if (!inGame) {
-                newGame();
-                repaint();
                 return;
             }
 
-            int cCol = x / CELL_SIZE;
-            int cRow = y / CELL_SIZE;
+            int cCol = x / cellSize;
+            int cRow = y / cellSize;
 
             boolean doRepaint = false;
 
-            if ((x < N_COLS * CELL_SIZE) && (y < N_ROWS * CELL_SIZE)) {
-                int cell = (cRow * N_COLS) + cCol;
+            if ((x < numCols * cellSize) && (y < numRows * cellSize)) {
+                int cell = (cRow * numCols) + cCol;
                 if (e.getButton() == MouseEvent.BUTTON3) {
                     if (field[cell] > MINE_CELL) {
                         doRepaint = true;

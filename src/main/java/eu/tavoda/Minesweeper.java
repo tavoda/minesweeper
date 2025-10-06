@@ -1,6 +1,7 @@
 package eu.tavoda;
 
 import java.awt.*;
+import java.util.Random;
 import javax.swing.*;
 
 /**
@@ -11,6 +12,7 @@ public class Minesweeper extends JFrame {
     private static final int DEFAULT_CELL_SIZE = 30;
 
     private JTextField statusbar;
+    private Random rand = new Random();
     MineField mineField;
     Color SEGMENT_ON = Color.GREEN.brighter().brighter().brighter().brighter().brighter();
 //    Color SEGMENT_OFF = Color.Green.darker().darker().darker().darker();
@@ -48,7 +50,8 @@ public class Minesweeper extends JFrame {
         statusbar = new JTextField("");
         add(statusbar, BorderLayout.SOUTH);
 
-        mineField = new MineField(statusbar, this::setSegments, 20, 40, 80, DEFAULT_CELL_SIZE);
+        mineField = new MineField(statusbar, this::setSegments);
+        mineField.newGame(20, 40, 80, rand.nextLong(), DEFAULT_CELL_SIZE);
         add(mineField);
 
         setTitle("Minesweeper");
@@ -71,25 +74,29 @@ public class Minesweeper extends JFrame {
 
     private Component getNoviceButton() {
         JButton novice = new JButton("Novice");
-        novice.addActionListener(e -> newGame(10, 10, 20, DEFAULT_CELL_SIZE));
+        novice.addActionListener(e -> newGame(10, 10, 20, rand.nextLong()));
         return novice;
     }
 
     private Component getIntermediateButton() {
         JButton novice = new JButton("Intermediate");
-        novice.addActionListener(e -> newGame(10, 20, 40, DEFAULT_CELL_SIZE));
+        novice.addActionListener(e -> newGame(10, 20, 40, rand.nextLong()));
         return novice;
     }
 
     private Component getExpertButton() {
         JButton novice = new JButton("Expert");
-        novice.addActionListener(e -> newGame(20, 40, 100, DEFAULT_CELL_SIZE));
+        novice.addActionListener(e -> newGame(20, 40, 100, rand.nextLong()));
         return novice;
     }
 
-    private void newGame(int rows, int columns, int mines, int cellSize) {
+    public void newGame(int rows, int columns, int mines, long randomStart) {
+        newGame(rows, columns, mines, randomStart, DEFAULT_CELL_SIZE);
+    }
+
+    private void newGame(int rows, int columns, int mines, long randomStart, int cellSize) {
         Dimension min = new Dimension(columns * cellSize, rows * cellSize);
-        mineField.setParameters(rows, columns, mines, cellSize);
+        mineField.newGame(rows, columns, mines, randomStart, cellSize);
         pack();
         repaint();
     }
