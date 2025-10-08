@@ -14,7 +14,6 @@ import javax.swing.*;
 public class MineField extends JPanel {
 
     private final int NUM_IMAGES = 13;
-    private final int MIN_CELL_SIZE = 15;
     private int cellSize = 30;
 
     private final int COVER_FOR_CELL = 10;
